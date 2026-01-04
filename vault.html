@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Archive - Vault</title>
+    <style>
+        :root {
+            --primary: #00ffea;
+            --secondary: #ff00aa;
+            --bg: #0a0a0f;
+            --card-bg: #111118;
+            --text: #e0e0ff;
+            --text-muted: #a0a0cc;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Orbitron', 'Arial Narrow', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f002b, #1a0033);
+            color: white;
+            padding: 100px 20px 120px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 30% 50%, var(--primary) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, var(--secondary) 0%, transparent 50%);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), var(--primary), transparent);
+            box-shadow: 0 0 20px var(--primary), 0 0 40px var(--secondary);
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            margin: 0 0 20px 0;
+            font-size: 4em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            text-shadow: 0 0 20px var(--primary);
+        }
+
+        header p {
+            font-size: 1.5em;
+            opacity: 0.9;
+            margin: 0 0 40px 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        /* Search Bar */
+        .search-container {
+            max-width: 700px;
+            margin: 0 auto 80px auto;
+            position: relative;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 20px 60px 20px 30px;
+            font-size: 1.4em;
+            font-family: 'Orbitron', sans-serif;
+            background: var(--card-bg);
+            border: 2px solid #222233;
+            border-radius: 50px;
+            color: var(--text);
+            box-shadow: 0 0 20px rgba(0, 255, 234, 0.1);
+            transition: all 0.4s ease;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(0, 255, 234, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 1.8em;
+            pointer-events: none;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 2.8em;
+            margin-bottom: 50px;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(0, 255, 234, 0.4);
+            letter-spacing: 4px;
+        }
+
+        .vault-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .vault-item {
+            background: var(--card-bg);
+            border: 1px solid #222233;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 255, 234, 0.1);
+            transition: all 0.5s ease;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .vault-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .vault-item:hover {
+            transform: translateY(-15px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 50px rgba(0, 255, 234, 0.25);
+        }
+
+        .vault-item-header {
+            background: linear-gradient(135deg, rgba(0,255,234,0.1), rgba(255,0,170,0.1));
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #222233;
+        }
+
+        .vault-item-header h3 {
+            color: var(--primary);
+            font-size: 1.8em;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(0, 255, 234, 0.4);
+        }
+
+        .vault-item-header .type {
+            color: var(--text-muted);
+            font-size: 1em;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .vault-item-body {
+            padding: 30px;
+        }
+
+        .vault-item-body p {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            min-height: 80px;
+        }
+
+        .download-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: #000;
+            font-weight: bold;
+            text-align: center;
+            padding: 16px;
+            font-size: 1.3em;
+            text-decoration: none;
+            border-radius: 50px;
+            box-shadow: 0 0 25px rgba(0, 255, 234, 0.5);
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(0, 255, 234, 0.8);
+        }
+
+        footer {
+            background-color: #050508;
+            color: #555;
+            text-align: center;
+            padding: 30px;
+            margin-top: auto;
+            border-top: 1px solid #222;
+        }
+
+        /* Floating WhatsApp Button */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 40px;
+            right: 40px;
+            background: linear-gradient(45deg, #25D366, #128C7E);
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 0 0 20px rgba(37, 211, 102, 0.6);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(37, 211, 102, 0.8);
+        }
+
+        .whatsapp-float i {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2.8em; letter-spacing: 4px; }
+            header p { font-size: 1.2em; }
+            h2 { font-size: 2.2em; }
+            .vault-grid { grid-template-columns: 1fr; }
+            .whatsapp-float {
+                width: 50px;
+                height: 50px;
+                font-size: 25px;
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <h1>Cyber Archive Vault</h1>
+            <p>Secure Access Point • Premium PDFs & Applications • Instant Download</p>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search for PDFs or applications..." autocomplete="off">
+            <i class="fas fa-search search-icon"></i>
+        </div>
+
+        <h2>Available Assets</h2>
+
+        <div class="vault-grid" id="vaultGrid">
+            <!-- Updated with legitimate free resources -->
+            <div class="vault-item" data-title="Ethical Hacking and Penetration Testing Guide" data-type="PDF">
+                <div class="vault-item-header">
+                    <h3>Jamb syllabus For Biology 2026</h3>
+                    <div class="type">PDF </div>
+                </div>
+                <div class="vault-item-body">
+                    <p>Comprehensive guide to reading for jamb 2026</p>
+                    <a href="https://www.mediafire.com/file/avnv8sixnfxzskh/Biology.pdf/file" target="_blank" class="download-btn">View/Download</a>
+                </div>
+            </div>
+
+            <div class="vault-item" data-title="Tails OS" data-type="Application">
+                <div class="vault-item-header">
+                    <h3>Jamb syllabus For Physics 2026</h3>
+                    <div class="type">PDF</div>
+                </div>
+                <div class="vault-item-body">
+                    <p>Comprehensive guide to reading for jamb 2026</p>
+                    <a href="https://www.mediafire.com/file/l9gdj1d686jxnaf/Physics-1_copy.pdf/file" target="_blank" class="download-btn">Download PDF</a>
+                </div>
+            </div>
+
+            <div class="vault-item" data-title="Prompt Engineering Guide" data-type="PDF">
+                <div class="vault-item-header">
+                    <h3>Jamb syllabus For Chemistry</h3>
+                    <div class="type"> PDF</div>
+                </div>
+                <div class="vault-item-body">
+                    <p>Comprehensive guide to reading for jamb 2026</p>
+                    <a href="https://www.mediafire.com/file/nct7zeeovdcdmx0/Chemistry_copy.pdf/file" target="_blank" class="download-btn">View Guide</a>
+                </div>
+            </div>
+
+            <div class="vault-item" data-title="Handbook of Applied Cryptography" data-type="PDF">
+                <div class="vault-item-header">
+                    <h3>Jamb syllabus for English Language</h3>
+                    <div class="type">PDF </div>
+                </div>
+                <div class="vault-item-body">
+                    <p>Comprehensive guide to reading for jamb 2026</p>
+                    <a href="https://www.mediafire.com/file/3dx1q4hwhkziw8d/Use-of-English_copy.pdf/file" target="_blank" class="download-btn">Download Chapters</a>
+                </div>
+            </div>
+
+            <div class="vault-item" data-title="Kali Linux" data-type="Application">
+                <div class="vault-item-header">
+                    <h3>Anatomy and physiology textbook</h3>
+                    <div class="type">PDF BOOK </div>
+                </div>
+                <div class="vault-item-body">
+                    <p>Anatomy and Physiology textbook limited edition Textbook </p>
+                    <a href="https://www.mediafire.com/file/5jz93nmhw0ztyac/ross-and-wilson-anatomy-and-physiology-in-health-a.pdf/file" target="_blank" class="download-btn">Download ISO</a>
+                </div>
+            </div>
+
+            <div class="vault-item" data-title="Cybersecurity Templates" data-type="Bundle">
+                <div class="vault-item-header">
+                    <h3>Pharmacology TextBook/h3>
+                    <div class="type">Free PDF Book </div>
+                </div>
+                <div class="vault-item-body">
+                    <p>Pharmacology Textbook Free PDF download .</p>
+                    <a href="https://www.template.net/reports/security" target="_blank" class="download-btn">Explore Templates</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>© 2026 Cyber Archive. All protocols secured.</p>
+    </footer>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/2347081617042" class="whatsapp-float" target="_blank" aria-label="Contact us on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script>
+        // Fade-in animation on scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            const items = document.querySelectorAll('.vault-item');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            items.forEach(item => observer.observe(item));
+        });
+
+        // Search functionality (improved to search description text as well)
+        const searchInput = document.getElementById('searchInput');
+        const vaultItems = document.querySelectorAll('.vault-item');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+
+            vaultItems.forEach(item => {
+                const title = item.getAttribute('data-title').toLowerCase();
+                const type = item.getAttribute('data-type').toLowerCase();
+                const desc = item.querySelector('p').textContent.toLowerCase();
+                const matches = title.includes(query) || type.includes(query) || desc.includes(query);
+
+                item.style.display = matches || query === '' ? 'block' : 'none';
+            });
+        });
+    </script>
+
+</body>
+    </html>            margin-bottom: 15px;
+            text-align: left;
+        }
+        .label {
+            font-weight: bold;
+            color: #210F60;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .value {
+            font-size: 18px;
+            color: #333;
+            word-break: break-all;
+        }
+        .note-box {
+            background-color: #e6f7ff;
+            border-left: 6px solid #210F60;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+            font-size: 16px;
+            color: #333;
+        }
+        .note-box strong {
+            color: #210F60;
+        }
+        .whatsapp-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .whatsapp-logo {
+            width: 40px;
+            height: 40px;
+        }
+        .button {
+            background-color: #210F60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 18px;
+            width: 100%;
+            margin-top: 30px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #180a45;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://www.bellanaija.com/wp-content/uploads/2023/07/OPay-New-Logo-1000x600.jpeg" alt="OPay Logo" class="logo">
+        <h2>Bank Transfer Details</h2>
+        
+        <div class="detail">
+            <span class="label">Bank</span>
+            <span class="value">OPay</span>
+        </div>
+        
+        <div class="detail">
+            <span class="label">Account Name</span>
+            <span class="value">NGOZI DORIS ONOVO</span>
+        </div>
+        
+        <div class="detail">
+            <span class="label">Account Number</span>
+            <span class="value">614 162 7800</span>
+        </div>
+
+        <!-- Short Note Box -->
+        <div class="note-box">
+            <strong>What to do after payment:</strong><br>
+            After all payment has been done, click "<strong>I Have Sent It</strong>" button below, and send payment screenshots to our WhatsApp number.<br><br>
+            You will receive your order within seconds!
+            <div class="whatsapp-info">
+                <img src="https://download.logo.wine/logo/WhatsApp/WhatsApp-Logo.wine.png" alt="WhatsApp Logo" class="whatsapp-logo">
+                <span><strong>WhatsApp:</strong> +2347081617042</span> <!-- Replace with actual number -->
+            </div>
+        </div>
+        
+         <a href="valstore.html" class="checkout-btn">
+    I Have Sent It </a>
+    </div>
+</body>
+</html>
